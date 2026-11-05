@@ -218,3 +218,15 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+# Local environment variables
+.env
+
+# Python virtual environment
+venv/
+.venv/
+
+# Test cache
+.pytest_cache/
+
+# VS Code workspace (optional)
+.vscode/
