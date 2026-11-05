@@ -1,10 +1,10 @@
 
-import os
-import jwt
-import secrets
 import hashlib
-
+import os
+import secrets
 from datetime import datetime, timedelta, timezone
+
+import jwt
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -46,9 +46,9 @@ def create_access_token(
     user_id: str,
     session_id: str,
     secret_key: str,
-    email: str = None,
-    role: str = None,
-    expires_minutes: int = None
+    email: str | None = None,
+    role: str | None = None,
+    expires_minutes: int | None = None
 ):
     """Generate a signed JWT access token."""
 
@@ -142,9 +142,9 @@ def register_refresh_token(
     refresh_token: str,
     user_id: str,
     session_id: str,
-    email: str = None,
-    role: str = None,
-    expires_days: int = None
+    email: str | None = None,
+    role: str | None = None,
+    expires_days: int | None = None
 ):
     """Register a refresh token in temporary memory.
 
@@ -180,8 +180,8 @@ def create_session_tokens(
     user_id: str,
     session_id: str,
     secret_key: str,
-    email: str = None,
-    role: str = None
+    email: str | None = None,
+    role: str | None = None
 ):
     """Create an access token and registered refresh token."""
 
