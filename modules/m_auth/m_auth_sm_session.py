@@ -9,6 +9,22 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+JWT_SECRET_KEY = os.getenv("JWT_SECRET_KEY", "").strip()
+
+
+def get_jwt_secret_key() -> str:
+    """Return the configured JWT secret after validating its strength."""
+    if not JWT_SECRET_KEY:
+        raise RuntimeError("JWT_SECRET_KEY is not configured.")
+
+    if len(JWT_SECRET_KEY.encode("utf-8")) < 32:
+        raise RuntimeError(
+            "JWT_SECRET_KEY must contain at least 32 bytes."
+        )
+
+    return JWT_SECRET_KEY
+
+
 # JWT configuration
 JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
 JWT_ISSUER = os.getenv("JWT_ISSUER", "maira-backend")

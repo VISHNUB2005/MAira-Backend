@@ -145,3 +145,82 @@ def test_revoke_session():
     assert verify_access_token(token, TEST_SECRET) is None
 
 
+
+
+def test_tampered_access_token_rejected():
+    from modules.m_auth.m_auth_sm_session import (
+        create_access_token,
+        verify_access_token,
+    )
+
+    secret = "test-secret-key-that-is-at-least-32-bytes"
+    token = create_access_token(
+        user_id="user-123",
+        session_id="session-123",
+        secret_key=secret,
+    )
+
+    parts = token.split(".")
+    parts[2] = ("A" if parts[2][0] != "A" else "B") + parts[2][1:]
+    tampered_token = ".".join(parts)
+
+    assert verify_access_token(tampered_token, secret) is None
+
+
+
+def test_wrong_issuer_rejected():
+    import jwt
+    from modules.m_auth.m_auth_sm_session import (
+        create_access_token,
+        verify_access_token,
+    )
+
+    secret = "test-secret-key-that-is-at-least-32-bytes"
+    token = create_access_token("user-123", "session-123", secret)
+    payload = jwt.decode(token, options={"verify_signature": False})
+    payload["iss"] = "wrong-issuer"
+    wrong_token = jwt.encode(payload, secret, algorithm="HS256")
+
+    assert verify_access_token(wrong_token, secret) is None
+
+
+def test_wrong_audience_rejected():
+    import jwt
+    from modules.m_auth.m_auth_sm_session import (
+        create_access_token,
+        verify_access_token,
+    )
+
+    secret = "test-secret-key-that-is-at-least-32-bytes"
+    token = create_access_token("user-123", "session-123", secret)
+    payload = jwt.decode(token, options={"verify_signature": False})
+    payload["aud"] = "wrong-audience"
+    wrong_token = jwt.encode(payload, secret, algorithm="HS256")
+
+    assert verify_access_token(wrong_token, secret) is None
+
+
+def test_missing_jwt_secret_rejected(monkeypatch):
+    import pytest
+    import modules.m_auth.m_auth_sm_session as session
+
+    monkeypatch.setattr(session, "JWT_SECRET_KEY", "")
+    with pytest.raises(RuntimeError):
+        session.get_jwt_secret_key()
+
+
+def test_weak_jwt_secret_rejected(monkeypatch):
+    import pytest
+    import modules.m_auth.m_auth_sm_session as session
+
+    monkeypatch.setattr(session, "JWT_SECRET_KEY", "short-secret")
+    with pytest.raises(RuntimeError):
+        session.get_jwt_secret_key()
+
+
+def test_strong_jwt_secret_accepted(monkeypatch):
+    import modules.m_auth.m_auth_sm_session as session
+
+    secret = "this-is-a-strong-test-secret-at-least-32"
+    monkeypatch.setattr(session, "JWT_SECRET_KEY", secret)
+    assert session.get_jwt_secret_key() == secret
