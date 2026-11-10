@@ -218,3 +218,23 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# Additional Mira security protections
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cert
+
+# Local development secrets
+secrets/
+credentials/
+.streamlit/secrets.toml
+
+# Additional IDE and temporary files
+.idea/
+*.swp
+*.swo
