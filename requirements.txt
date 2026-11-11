@@ -1,0 +1,8 @@
+python-dotenv
+email-validator
+pytest
+pytest-cov
+# Optional: only if you use these
+# boto3          (AWS Secrets Manager for secrets)
+# fastapi        (demo app in demo/)
+# uvicorn        (demo app in demo/)
