@@ -26,7 +26,10 @@ def get_jwt_secret_key() -> str:
 
 
 # JWT configuration
-JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256")
+JWT_ALGORITHM = os.getenv("JWT_ALGORITHM", "HS256").strip()
+
+if JWT_ALGORITHM != "HS256":
+    raise RuntimeError("Only HS256 JWT algorithm is allowed.")
 JWT_ISSUER = os.getenv("JWT_ISSUER", "maira-backend")
 JWT_AUDIENCE = os.getenv("JWT_AUDIENCE", "maira-api")
 ACCESS_TOKEN_EXPIRE_MINUTES = int(
@@ -56,7 +59,11 @@ def create_access_token(
         raise ValueError("User ID, session ID and secret key are required.")
 
     now = datetime.now(timezone.utc)
-    expiry = expires_minutes or ACCESS_TOKEN_EXPIRE_MINUTES
+    expiry = (
+    ACCESS_TOKEN_EXPIRE_MINUTES
+    if expires_minutes is None
+    else expires_minutes
+)
 
     if expiry <= 0:
         raise ValueError("Token expiry must be positive.")
@@ -93,12 +100,24 @@ def verify_access_token(token: str, secret_key: str):
 
     try:
         payload = jwt.decode(
-            token,
-            secret_key,
-            algorithms=[JWT_ALGORITHM],
-            issuer=JWT_ISSUER,
-            audience=JWT_AUDIENCE
-        )
+    token,
+    secret_key,
+    algorithms=["HS256"],
+    issuer=JWT_ISSUER,
+    audience=JWT_AUDIENCE,
+    options={
+        "require": [
+            "sub",
+            "sid",
+            "jti",
+            "iat",
+            "exp",
+            "iss",
+            "aud",
+            "type"
+        ]
+    }
+)
 
         if payload.get("type") != "access":
             return None
@@ -156,7 +175,12 @@ def register_refresh_token(
     if not refresh_token or not user_id or not session_id:
         raise ValueError("Refresh token, user ID and session ID are required.")
 
-    expiry_days = expires_days or REFRESH_TOKEN_EXPIRE_DAYS
+    expiry_days = (
+        REFRESH_TOKEN_EXPIRE_DAYS
+        if expires_days is None
+        else expires_days
+    )
+
 
     if expiry_days <= 0:
         raise ValueError("Refresh token expiry must be positive.")

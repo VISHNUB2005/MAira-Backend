@@ -433,3 +433,38 @@ def test_revoke_session_rejects_missing_session_id():
     import modules.m_auth.m_auth_sm_session as session
 
     assert session.revoke_session("") is False
+def test_access_token_rejects_missing_required_claims():
+    import jwt
+
+    from modules.m_auth.m_auth_sm_session import (
+        create_access_token,
+        verify_access_token,
+    )
+
+    secret = "test-secret-key-that-is-at-least-32-bytes"
+    token = create_access_token("user-123", "session-123", secret)
+
+    payload = jwt.decode(token, options={"verify_signature": False})
+
+    required_claims = [
+        "sub",
+        "sid",
+        "jti",
+        "iat",
+        "exp",
+        "iss",
+        "aud",
+        "type",
+    ]
+
+    for claim in required_claims:
+        modified_payload = payload.copy()
+        modified_payload.pop(claim)
+
+        modified_token = jwt.encode(
+            modified_payload,
+            secret,
+            algorithm="HS256",
+        )
+
+        assert verify_access_token(modified_token, secret) is None
