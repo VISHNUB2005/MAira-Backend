@@ -238,3 +238,5 @@ credentials/
 .idea/
 *.swp
 *.swo
+*.zip
+
