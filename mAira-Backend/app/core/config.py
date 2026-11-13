@@ -121,18 +121,38 @@ class Settings(BaseSettings):
         if len(self.JWT_SECRET_KEY.encode("utf-8")) < 32:
             raise ValueError("JWT_SECRET_KEY must contain at least 32 bytes (256 bits of entropy).")
 
-        # Validate Gen AI Service Secret
+        # Production-specific validations
         if is_prod:
+            insecure_markers = ["dev_", "insecure", "changeme", "fallback", "example", "default"]
+            if any(m in self.JWT_SECRET_KEY.lower() for m in insecure_markers):
+                raise ValueError("Production JWT_SECRET_KEY must not use development fallback values.")
+
+            if self.DEBUG:
+                raise ValueError("DEBUG mode must be disabled in production.")
+
+            if not self.MFA_ENABLED:
+                raise ValueError("MFA_ENABLED is mandatory and must be True in production.")
+
             if not self.GENAI_SERVICE_SECRET:
                 raise ValueError("GENAI_SERVICE_SECRET is mandatory in production.")
             if len(self.GENAI_SERVICE_SECRET.encode("utf-8")) < 16:
                 raise ValueError("GENAI_SERVICE_SECRET must be at least 16 bytes in production.")
+
             if not self.DB_PASSWORD:
                 raise ValueError("DB_PASSWORD is mandatory in production.")
+
+            if self.DB_NAME == self.TEST_DB_NAME:
+                raise ValueError("Production database name cannot be the test database name.")
+
             if self.EMAIL_PROVIDER == "mock":
                 raise ValueError("EMAIL_PROVIDER cannot be 'mock' in production.")
-            if "*" in self.cors_allow_origins and self.CORS_ALLOW_CREDENTIALS:
-                raise ValueError("Wildcard '*' CORS origin cannot be used with credentials in production.")
+
+            if self.EMAIL_PROVIDER == "smtp":
+                if not self.EMAIL_HOST or not self.EMAIL_USERNAME or not self.EMAIL_PASSWORD:
+                    raise ValueError("EMAIL_HOST, EMAIL_USERNAME, and EMAIL_PASSWORD are required when using SMTP in production.")
+
+            if "*" in self.cors_allow_origins:
+                raise ValueError("Wildcard '*' CORS origin is strictly forbidden in production.")
 
         return self
 

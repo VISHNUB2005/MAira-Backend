@@ -101,16 +101,22 @@ class EmailService:
         try:
             await asyncio.to_thread(_blocking_send)
             return SendResult(accepted=True, provider="smtp")
+        except smtplib.SMTPAuthenticationError:
+            logger.error("SMTP dispatch failed to %s: Authentication rejected by server", to_email)
+            return SendResult(accepted=False, provider="smtp", error="SMTP authentication failure")
+        except (smtplib.SMTPConnectError, TimeoutError, OSError) as e:
+            logger.error("SMTP connection failed to %s: %s", to_email, type(e).__name__)
+            return SendResult(accepted=False, provider="smtp", error="SMTP connection timeout or unreachable")
         except Exception as e:
-            logger.error(f"SMTP dispatch failed to {to_email}: {e}")
-            return SendResult(accepted=False, provider="smtp", error=str(e))
+            logger.error("SMTP dispatch failed to %s: %s", to_email, type(e).__name__)
+            return SendResult(accepted=False, provider="smtp", error="SMTP transmission failed")
 
     async def send_email(self, to_email: str, content: EmailContent) -> SendResult:
         if self.provider in ("mock", "test"):
             return await MockEmailProvider.send(to_email, content)
 
         elif self.provider == "console":
-            logger.info(f"=== CONSOLE EMAIL ===\nTo: {to_email}\nSubject: {content.subject}\nBody: {content.text_body}\n=====================")
+            logger.info("=== CONSOLE EMAIL ===\nTo: %s\nSubject: %s\n[Body omitted for security]\n=====================", to_email, content.subject)
             return SendResult(accepted=True, provider="console", message_id="console-1")
 
         elif self.provider == "smtp":

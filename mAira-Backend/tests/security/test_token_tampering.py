@@ -4,7 +4,7 @@ import base64
 import json
 import pytest
 from httpx import AsyncClient
-from jose import jwt
+import jwt
 from app.core.config import get_settings
 
 settings = get_settings()
