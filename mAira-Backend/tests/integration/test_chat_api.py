@@ -176,3 +176,33 @@ async def test_chat_canonical_sessions_lifecycle(
     )
     assert get_del.status_code == 404
 
+
+@pytest.mark.asyncio
+async def test_send_message_when_genai_service_fails_returns_503(
+    client: AsyncClient, student_auth_headers: dict
+):
+    """Verify that when Gen AI microservice is unreachable/times out, 503 is returned cleanly."""
+    create_res = await client.post(
+        "/api/v1/chat/sessions",
+        json={"title": "Error Handling Test"},
+        headers=student_auth_headers,
+    )
+    session_id = create_res.json()["chat_session_id"]
+
+    from app.core.exceptions import GenAIServiceError
+
+    with patch(
+        "app.services.genai_service.GenAIClient.generate_response",
+        side_effect=GenAIServiceError("AI service temporarily unavailable"),
+    ):
+        msg_res = await client.post(
+            f"/api/v1/chat/sessions/{session_id}/messages",
+            json={"content": "Hello AI?"},
+            headers=student_auth_headers,
+        )
+        assert msg_res.status_code == 503
+        data = msg_res.json()
+        assert data["code"] == "AI_SERVICE_UNAVAILABLE"
+        assert "temporarily unavailable" in data["message"].lower()
+
+

@@ -227,3 +227,91 @@ async def test_login_inactive_user_rejected(client: AsyncClient, db_session: Asy
     )
     assert res.status_code == 403
     assert "inactive" in res.json()["message"].lower()
+
+
+@pytest.mark.asyncio
+async def test_logout_all_sessions_revokes_all_active_sessions(client: AsyncClient, db_session: AsyncSession):
+    user_repo = UserRepository(db_session)
+    email = "multisession.student@institution.edu"
+    from app.core.security import hash_password
+
+    user = await user_repo.create_user(email=email, user_type="STUDENT", status="ACTIVE")
+    user.password_hash = hash_password("ValidPassword123!")
+    await db_session.flush()
+
+    # Session 1 login
+    login1 = await client.post("/api/v1/auth/login", json={"email": email, "password": "ValidPassword123!"})
+    mfa1 = login1.json()["mfa_token"]
+    msg1 = MockEmailProvider.get_latest_for(email)
+    code1 = re.search(r"\b\d{6}\b", msg1["text"]).group(0)
+    tokens1 = (await client.post("/api/v1/auth/mfa/verify", json={"mfa_token": mfa1, "code": code1})).json()
+
+    # Session 2 login
+    login2 = await client.post("/api/v1/auth/login", json={"email": email, "password": "ValidPassword123!"})
+    mfa2 = login2.json()["mfa_token"]
+    msg2 = MockEmailProvider.get_latest_for(email)
+    code2 = re.search(r"\b\d{6}\b", msg2["text"]).group(0)
+    tokens2 = (await client.post("/api/v1/auth/mfa/verify", json={"mfa_token": mfa2, "code": code2})).json()
+
+    # Both sessions work initially
+    me1 = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {tokens1['access_token']}"})
+    assert me1.status_code == 200
+    me2 = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {tokens2['access_token']}"})
+    assert me2.status_code == 200
+
+    # Logout all sessions using Session 1
+    logout_res = await client.post(
+        "/api/v1/auth/logout",
+        headers={"Authorization": f"Bearer {tokens1['access_token']}"},
+        json={"all_sessions": True},
+    )
+    assert logout_res.status_code == 200
+
+    # Both sessions must now be rejected
+    after1 = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {tokens1['access_token']}"})
+    assert after1.status_code == 401
+    after2 = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {tokens2['access_token']}"})
+    assert after2.status_code == 401
+
+
+@pytest.mark.asyncio
+async def test_account_deactivation_blocks_active_session(
+    client: AsyncClient, db_session: AsyncSession, admin_auth_headers: dict
+):
+    user_repo = UserRepository(db_session)
+    email = "to.be.deactivated@institution.edu"
+    from app.core.security import hash_password
+
+    user = await user_repo.create_user(email=email, user_type="STUDENT", status="ACTIVE")
+    user.password_hash = hash_password("ValidPassword123!")
+    await db_session.flush()
+    target_user_id = user.user_id
+
+    # Student logs in
+    login_res = await client.post("/api/v1/auth/login", json={"email": email, "password": "ValidPassword123!"})
+    mfa_token = login_res.json()["mfa_token"]
+    msg = MockEmailProvider.get_latest_for(email)
+    code = re.search(r"\b\d{6}\b", msg["text"]).group(0)
+    tokens = (await client.post("/api/v1/auth/mfa/verify", json={"mfa_token": mfa_token, "code": code})).json()
+    access_token = tokens["access_token"]
+
+    # Student can access profile
+    ok_res = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {access_token}"})
+    assert ok_res.status_code == 200
+
+    # Admin deactivates student
+    deact_res = await client.patch(
+        f"/api/v1/admin/users/students/{target_user_id}/status",
+        json={"status": "INACTIVE"},
+        headers=admin_auth_headers,
+    )
+    assert deact_res.status_code == 200
+
+    # Student tries to use previously valid token -> Rejected (session revoked / account inactive)
+    blocked_res = await client.get("/api/v1/users/me", headers={"Authorization": f"Bearer {access_token}"})
+    assert blocked_res.status_code in (401, 403)
+    assert any(
+        msg in blocked_res.json()["message"].lower()
+        for msg in ("inactive", "revoked")
+    )
+
