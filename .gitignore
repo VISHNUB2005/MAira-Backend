@@ -240,3 +240,10 @@ credentials/
 *.swo
 *.zip
 
+
+# MAIRA frontend and generated files
+node_modules/
+dist/
+build/
+coverage/
+.vite/

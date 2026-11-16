@@ -1,0 +1,186 @@
+/* Responsive Breakpoints & Viewport Adaptations */
+
+/* Tablet Landscape & Medium Desktops (<= 1024px) */
+@media (max-width: 1024px) {
+  /* Landing */
+  .landing-hero {
+    grid-template-columns: 1fr;
+    gap: 40px;
+    margin: 30px auto 60px;
+  }
+
+  .capabilities-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .capabilities-grid .capability-card:nth-child(4),
+  .capabilities-grid .capability-card:nth-child(5) {
+    grid-column: span 1;
+  }
+
+  .footer-content {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 36px;
+  }
+
+  /* Admin */
+  .admin-stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-middle-grid,
+  .admin-bottom-grid {
+    grid-template-columns: 1fr;
+  }
+
+  /* User Dashboard */
+  .user-content-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .quick-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* Tablet Portrait & Large Phones (<= 768px) */
+@media (max-width: 768px) {
+  /* Landing */
+  .landing-nav-links {
+    display: none;
+  }
+
+  .hero-title {
+    font-size: 2.3rem;
+  }
+
+  .capabilities-grid,
+  .how-it-works-grid,
+  .trust-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .footer-content {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+
+  .footer-bottom {
+    flex-direction: column;
+    gap: 12px;
+    text-align: center;
+  }
+
+  /* Split Auth Screens */
+  .auth-split-wrapper {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+
+  /* Admin Dashboard */
+  .admin-layout {
+    flex-direction: column;
+  }
+
+  .admin-sidebar {
+    width: 100%;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #1E293B;
+  }
+
+  .admin-header-banner {
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .admin-header-actions {
+    flex-wrap: wrap;
+  }
+
+  .admin-stats-grid {
+    grid-template-columns: 1fr;
+    padding: 12px 16px;
+  }
+
+  .admin-middle-grid,
+  .admin-bottom-grid {
+    padding: 0 16px 20px;
+  }
+
+  .admin-topbar {
+    padding: 0 16px;
+  }
+
+  .admin-search-wrapper {
+    width: 180px;
+  }
+
+  /* User Dashboard */
+  .user-dashboard-layout {
+    flex-direction: column;
+  }
+
+  .user-sidebar {
+    width: 100%;
+    min-height: auto;
+    border-right: none;
+    border-bottom: 1px solid #1E293B;
+  }
+
+  .user-topbar {
+    padding: 0 16px;
+  }
+
+  .user-hero-container {
+    padding: 24px 16px;
+  }
+
+  .user-quick-actions-section,
+  .user-content-grid {
+    padding: 0 16px;
+  }
+}
+
+/* Small Mobile Screens (<= 480px / 375px) */
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 1.85rem;
+  }
+
+  .auth-hero-card,
+  .auth-form-card {
+    padding: 22px 16px;
+  }
+
+  .quick-cards-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .user-hero-title {
+    font-size: 1.75rem;
+  }
+
+  .chat-controls-left {
+    gap: 8px;
+  }
+
+  .model-tag-pill {
+    display: none;
+  }
+
+  .admin-search-wrapper {
+    display: none;
+  }
+
+  .chart-controls {
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+  }
+
+  .chart-mini-metrics {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
