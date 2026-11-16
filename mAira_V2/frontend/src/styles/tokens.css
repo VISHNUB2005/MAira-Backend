@@ -1,0 +1,66 @@
+:root {
+  /* Colors */
+  --bg-primary: #070a12;
+  --bg-secondary: #0b0f19;
+  --bg-tertiary: #111827;
+  --bg-card: #111726;
+  --bg-card-hover: #162035;
+  --bg-card-border: #1e293b;
+  --bg-input: #0d1322;
+  --bg-input-border: #223049;
+  --bg-glass: rgba(17, 24, 39, 0.75);
+
+  /* Gradients */
+  --grad-primary-btn: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);
+  --grad-primary-hover: linear-gradient(135deg, #1d4ed8 0%, #6d28d9 100%);
+  --grad-accent-btn: #38bdf8;
+  --grad-text-blue: linear-gradient(135deg, #60a5fa 0%, #a855f7 100%);
+  --grad-cyan-glow: radial-gradient(circle at 50% 0%, rgba(56, 189, 248, 0.15) 0%, transparent 70%);
+
+  /* Text Colors */
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
+  --text-subtle: #475569;
+  --text-blue: #38bdf8;
+  --text-purple: #c084fc;
+  --text-emerald: #34d399;
+  --text-amber: #fbbf24;
+  --text-rose: #f87171;
+
+  /* Accent Colors */
+  --accent-blue: #2563eb;
+  --accent-blue-light: #38bdf8;
+  --accent-purple: #7c3aed;
+  --accent-emerald: #10b981;
+  --accent-emerald-bg: rgba(16, 185, 129, 0.15);
+  --accent-blue-bg: rgba(37, 99, 235, 0.15);
+  --accent-purple-bg: rgba(124, 58, 237, 0.15);
+  --accent-amber-bg: rgba(245, 158, 11, 0.15);
+  --accent-rose-bg: rgba(239, 68, 68, 0.15);
+
+  /* Borders & Radii */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Typography */
+  --font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-size-xs: 0.75rem;
+  --font-size-sm: 0.84rem;
+  --font-size-base: 0.95rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.35rem;
+  --font-size-2xl: 1.75rem;
+  --font-size-3xl: 2.25rem;
+  --font-size-4xl: 2.85rem;
+  --font-size-5xl: 3.5rem;
+
+  /* Shadows */
+  --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+  --shadow-glow-blue: 0 0 25px rgba(37, 99, 235, 0.25);
+  --shadow-glow-cyan: 0 0 20px rgba(56, 189, 248, 0.2);
+  --shadow-input-focus: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
